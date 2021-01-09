@@ -1,0 +1,5 @@
+todoist-python
+flask
+gunicorn
+python-dotenv
+requests
