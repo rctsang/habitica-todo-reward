@@ -9,6 +9,7 @@ from habitica_utils import create_habitica_auth_headers, create_habitica_task, c
 from todoist.api import TodoistAPI
 from dotenv import load_dotenv
 from flask import request
+from threading import Thread
 
 load_dotenv()
 app = Flask(__name__)
@@ -21,8 +22,15 @@ priority_lookup = {
 }
 
 @app.route('/todoist_item_completed', methods=['POST'])
-def create_and_complete_task_in_habitica():
+def handle_todoist_webhook():
 	request_data = request.get_json()
+
+	t = Thread(target=create_and_complete_task_in_habitica, args=(request_data,))
+	t.start()
+
+	return "OK", 200
+
+def create_and_complete_task_in_habitica(request_data):
 	task_content = request_data["event_data"]["content"]
 	info(f"Task received from Todoist: {task_content}")
 	print(f"Task received from Todoist: {task_content}")
@@ -42,7 +50,7 @@ def create_and_complete_task_in_habitica():
 		raise RuntimeError(f"Unable to complete Habitica task: {created_task_id}")
 	info(f"Completed Habitica task: {created_task_id}")
 	print(f"Completed Habitica task: {created_task_id}")
-	return "OK", 200
+	return 
 
 @app.route('/todoist_projects')
 def todoist_projects():
