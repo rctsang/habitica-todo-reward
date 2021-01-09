@@ -18,7 +18,7 @@ Note: Trivial is not used because I'm lazy and by default Todoist sets all tasks
 General Commands:
 ```
 heroku create <app name> 		# creates an app on heroku at https://<app name>.herokuapp.com/ (only done once)
-git push heroku main 			# deploy on heroku
+git push heroku master 			# deploy on heroku
 heroku ps:scale web=1			# check that at least one app instance is running
 heroku open						# opens the generated url
 heroku logs --tail				# view request logs (Crtl+C to quit)

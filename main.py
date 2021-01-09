@@ -25,6 +25,7 @@ def create_and_complete_task_in_habitica():
 	request_data = request.get_json()
 	task_content = request_data["event_data"]["content"]
 	info(f"Task received from Todoist: {task_content}")
+	print(f"Task received from Todoist: {task_content}")
 	auth_headers = create_habitica_auth_headers()
 	todo_priority = int(request_data["event_data"]["priority"])
 	priority = priority_lookup[todo_priority]
@@ -32,6 +33,7 @@ def create_and_complete_task_in_habitica():
 	if not created_task_id:
 		raise RuntimeError("Unable to create Habitica Task")
 	info(f"Created Habitica task: {created_task_id}")
+	print(f"Created Habitica task: {created_task_id}")
 
 	time.sleep(30)
 
@@ -39,6 +41,7 @@ def create_and_complete_task_in_habitica():
 	if not completed:
 		raise RuntimeError(f"Unable to complete Habitica task: {created_task_id}")
 	info(f"Completed Habitica task: {created_task_id}")
+	print(f"Completed Habitica task: {created_task_id}")
 	return "OK", 200
 
 @app.route('/todoist_projects')
