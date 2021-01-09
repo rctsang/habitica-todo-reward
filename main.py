@@ -13,13 +13,22 @@ from flask import request
 load_dotenv()
 app = Flask(__name__)
 
+priority_lookup = {
+	1: '2', 
+	2: '1.5',
+	3: '1',
+	4: '1'
+}
+
 @app.route('/todoist_item_completed', methods=['POST'])
 def create_and_complete_task_in_habitica():
 	request_data = request.get_json()
 	task_content = request_data["event_data"]["content"]
 	info(f"Task received from Todoist: {task_content}")
 	auth_headers = create_habitica_auth_headers()
-	created_task_id = create_habitica_task(auth_headers, task_content)
+	todo_priority = int(request_data["event_data"]["priority"])
+	priority = priority_lookup[todo_priority]
+	created_task_id = create_habitica_task(auth_headers, task_content, priority=priority)
 	if not created_task_id:
 		raise RuntimeError("Unable to create Habitica Task")
 	info(f"Created Habitica task: {created_task_id}")
