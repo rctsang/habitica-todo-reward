@@ -10,6 +10,7 @@ from todoist.api import TodoistAPI
 from dotenv import load_dotenv
 from flask import request
 from threading import Thread
+# threading package doesn't run threads in parallel, it runs concurrently
 
 load_dotenv()
 app = Flask(__name__)
@@ -21,16 +22,21 @@ priority_lookup = {
 	4: '1'
 }
 
+jobs = set()
+
 @app.route('/todoist_item_completed', methods=['POST'])
 def handle_todoist_webhook():
 	request_data = request.get_json()
+	task_id = request_data["event_data"]["id"]
 
-	t = Thread(target=create_and_complete_task_in_habitica, args=(request_data,))
-	t.start()
+	if task_id not in jobs:
+		t = Thread(target=create_and_complete_task_in_habitica, args=(request_data,))
+		t.start()
 
 	return "OK", 200
 
 def create_and_complete_task_in_habitica(request_data):
+	jobs.add(request_data["event_data"]["id"])
 	task_content = request_data["event_data"]["content"]
 	info(f"Task received from Todoist: {task_content}")
 	print(f"Task received from Todoist: {task_content}")
@@ -50,6 +56,7 @@ def create_and_complete_task_in_habitica(request_data):
 		raise RuntimeError(f"Unable to complete Habitica task: {created_task_id}")
 	info(f"Completed Habitica task: {created_task_id}")
 	print(f"Completed Habitica task: {created_task_id}")
+	jobs.discard(request_data["event_data"]["id"])
 	return 
 
 @app.route('/todoist_projects')
