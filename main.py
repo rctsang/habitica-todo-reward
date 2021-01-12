@@ -23,20 +23,25 @@ priority_lookup = {
 }
 
 jobs = set()
+# When deployed on Heroku, completed_jobs will be lost when process ends
+# so we shouldn't need to worry about a stack overflow
+completed_jobs = []  
 
 @app.route('/todoist_item_completed', methods=['POST'])
 def handle_todoist_webhook():
 	request_data = request.get_json()
 	task_id = request_data["event_data"]["id"]
 
-	if task_id not in jobs:
+	if task_id not in jobs and task_id not in completed_jobs:
 		t = Thread(target=create_and_complete_task_in_habitica, args=(request_data,))
 		t.start()
 
 	return "OK", 200
 
 def create_and_complete_task_in_habitica(request_data):
-	jobs.add(request_data["event_data"]["id"])
+	task_id = request_data["event_data"]["id"]
+	jobs.add(task_id)
+	print(f"Current Jobs: {jobs}")
 	task_content = request_data["event_data"]["content"]
 	info(f"Task received from Todoist: {task_content}")
 	print(f"Task received from Todoist: {task_content}")
@@ -56,7 +61,8 @@ def create_and_complete_task_in_habitica(request_data):
 		raise RuntimeError(f"Unable to complete Habitica task: {created_task_id}")
 	info(f"Completed Habitica task: {created_task_id}")
 	print(f"Completed Habitica task: {created_task_id}")
-	jobs.discard(request_data["event_data"]["id"])
+	completed_jobs.append(task_id)
+	print(f"Handled Todoist Webhook for Task: {task_id}")
 	return 
 
 @app.route('/todoist_projects')
