@@ -11,9 +11,12 @@ from dotenv import load_dotenv
 from flask import request
 from threading import Thread
 # threading package doesn't run threads in parallel, it runs concurrently
+import redis
 
 load_dotenv()
 app = Flask(__name__)
+
+r = redis.from_url(environ["REDIS_URL"])
 
 priority_lookup = {
 	1: '2', 
@@ -22,17 +25,12 @@ priority_lookup = {
 	4: '1'
 }
 
-jobs = set()
-# When deployed on Heroku, completed_jobs will be lost when process ends
-# so we shouldn't need to worry about a stack overflow
-completed_jobs = []  
-
 @app.route('/todoist_item_completed', methods=['POST'])
 def handle_todoist_webhook():
 	request_data = request.get_json()
 	task_id = request_data["event_data"]["id"]
 
-	if task_id not in jobs and task_id not in completed_jobs:
+	if not r.sismember("jobs", task_id):
 		t = Thread(target=create_and_complete_task_in_habitica, args=(request_data,))
 		t.start()
 
@@ -40,8 +38,7 @@ def handle_todoist_webhook():
 
 def create_and_complete_task_in_habitica(request_data):
 	task_id = request_data["event_data"]["id"]
-	jobs.add(task_id)
-	print(f"Current Jobs: {jobs}")
+	r.sadd("jobs", task_id)
 	task_content = request_data["event_data"]["content"]
 	info(f"Task received from Todoist: {task_content}")
 	print(f"Task received from Todoist: {task_content}")
@@ -61,7 +58,7 @@ def create_and_complete_task_in_habitica(request_data):
 		raise RuntimeError(f"Unable to complete Habitica task: {created_task_id}")
 	info(f"Completed Habitica task: {created_task_id}")
 	print(f"Completed Habitica task: {created_task_id}")
-	completed_jobs.append(task_id)
+
 	print(f"Handled Todoist Webhook for Task: {task_id}")
 	return 
 
