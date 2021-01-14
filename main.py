@@ -17,6 +17,7 @@ load_dotenv()
 app = Flask(__name__)
 
 r = redis.from_url(environ["REDIS_URL"])
+r.flushall() # flush the database on startup so we don't use up all our space
 
 priority_lookup = {
 	1: '2', 
