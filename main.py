@@ -32,6 +32,7 @@ def handle_todoist_webhook():
 	task_id = request_data["event_data"]["id"]
 
 	if not r.sismember("jobs", task_id):
+		r.sadd("jobs", task_id)
 		t = Thread(target=create_and_complete_task_in_habitica, args=(request_data,))
 		t.start()
 
@@ -39,7 +40,6 @@ def handle_todoist_webhook():
 
 def create_and_complete_task_in_habitica(request_data):
 	task_id = request_data["event_data"]["id"]
-	r.sadd("jobs", task_id)
 	task_content = request_data["event_data"]["content"]
 	info(f"Task received from Todoist: {task_content}")
 	print(f"Task received from Todoist: {task_content}")
