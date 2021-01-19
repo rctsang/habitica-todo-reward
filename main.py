@@ -27,6 +27,8 @@ priority_lookup = {
 	4: '1'
 }
 
+p_from_str = ['1', '1.5', '2', '2']
+
 @app.route('/todoist_item_completed', methods=['POST'])
 def handle_todoist_webhook():
 	request_data = request.get_json()
@@ -41,15 +43,18 @@ def handle_todoist_webhook():
 
 def create_and_complete_task_in_habitica(request_data):
 	task_id = request_data["event_data"]["id"]
-	task_all_content = json.dumps(request_data["event_data"], indent=2)
+	# task_all_content = json.dumps(request_data["event_data"], indent=2)
 	task_content = request_data["event_data"]["content"]
 	info(f"Task received from Todoist: {task_content}")
 	print(f"Task received from Todoist: {task_content}")
-	print(f"\nTask Content: \n{task_all_content}\n")
+	# print(f"\nTask Content: \n{task_all_content}\n")
 	auth_headers = create_habitica_auth_headers()
-	todo_priority = int(request_data["event_data"]["priority"])
-	print(f"Todoist Task Priority: {todo_priority}")
-	priority = priority_lookup[todo_priority]
+	# todo_priority = int(request_data["event_data"]["priority"])
+	# print(f"Todoist Task Priority: {todo_priority}")
+	# priority = priority_lookup[todo_priority]
+	priority = p_from_str[min(task_content.count('!'), 3)]
+	if '$' in task_content:
+		priority = '0.1'
 	print(f"Habitica Priority: {priority}")
 	created_task_id = create_habitica_task(auth_headers, task_content, priority=priority)
 	if not created_task_id:

@@ -65,14 +65,27 @@ That should be it. Try checking off an item and Todoist and after about a minute
 
 ## Application Notes
 
-| Todoist Priority | Habitica Difficulty |
+To pick a difficulty in Habitica from Todoist, simply add the number of '!' corrosponding to the desired difficulty.
+
+| Indicator | Habitica Difficulty |
+| :---: | :--- |
+| '!!!' | Hard |
+| '!!' | Hard |
+| '!' | Medium |
+| '' | Easy |
+| '$' | Trivial |
+
+**Below is currently unused**
+Why? The Todoist webhooks sometimes assign a priority of 1 to your tasks if they don't have an explicitly given priority, which over-rewards you in habitica. 
+
+~~| Todoist Priority | Habitica Difficulty |
 | :---: | :--- |
 | 1 | Hard |
 | 2 | Medium |
 | 3 | Easy |
-| 4 | Easy |
+| 4 | Easy |~~
 
-Note: Trivial is not used because I'm lazy and by default Todoist sets all tasks to priority 4. If it's not important it should just be easy, not trivial.
+~~Note: Trivial is not used because I'm lazy and by default Todoist sets all tasks to priority 4. If it's not important it should just be easy, not trivial.~~
 
 ## Heroku Command Line Interface
 
