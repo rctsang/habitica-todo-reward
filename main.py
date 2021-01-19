@@ -45,7 +45,9 @@ def create_and_complete_task_in_habitica(request_data):
 	print(f"Task received from Todoist: {task_content}")
 	auth_headers = create_habitica_auth_headers()
 	todo_priority = int(request_data["event_data"]["priority"])
+	print(f"Todoist Task Priority: {todo_priority}")
 	priority = priority_lookup[todo_priority]
+	print(f"Habitica Priority: {priority}")
 	created_task_id = create_habitica_task(auth_headers, task_content, priority=priority)
 	if not created_task_id:
 		raise RuntimeError("Unable to create Habitica Task")
