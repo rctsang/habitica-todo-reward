@@ -3,6 +3,7 @@
 from logging import info
 from os import environ
 import time
+import json
 
 from flask import Flask, jsonify
 from habitica_utils import create_habitica_auth_headers, create_habitica_task, complete_habitica_task
@@ -40,9 +41,11 @@ def handle_todoist_webhook():
 
 def create_and_complete_task_in_habitica(request_data):
 	task_id = request_data["event_data"]["id"]
+	task_all_content = json.dumps(request_data["event_data"], indent=2)
 	task_content = request_data["event_data"]["content"]
 	info(f"Task received from Todoist: {task_content}")
 	print(f"Task received from Todoist: {task_content}")
+	print(f"\nTask Content: \n{task_all_content}\n")
 	auth_headers = create_habitica_auth_headers()
 	todo_priority = int(request_data["event_data"]["priority"])
 	print(f"Todoist Task Priority: {todo_priority}")
