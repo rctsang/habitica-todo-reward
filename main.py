@@ -13,10 +13,12 @@ from flask import request
 from threading import Thread
 # threading package doesn't run threads in parallel, it runs concurrently
 import redis
+import redis_lock
 
 load_dotenv()
 app = Flask(__name__)
 
+print("Opening Redis Connection")
 r = redis.from_url(environ["REDIS_URL"])
 r.flushall() # flush the database on startup so we don't use up all our space
 
@@ -34,10 +36,11 @@ def handle_todoist_webhook():
 	request_data = request.get_json()
 	task_id = request_data["event_data"]["id"]
 
-	if not r.sismember("jobs", task_id):
-		r.sadd("jobs", task_id)
-		t = Thread(target=create_and_complete_task_in_habitica, args=(request_data,))
-		t.start()
+	with redis_lock.Lock(r, "jobs-lock"):
+		if not r.sismember("jobs", task_id):
+			r.sadd("jobs", task_id)
+			t = Thread(target=create_and_complete_task_in_habitica, args=(request_data,))
+			t.start()
 
 	return "OK", 200
 
